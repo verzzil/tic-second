@@ -19,18 +19,18 @@ public class Main {
         StringBuilder result = new StringBuilder();
         ArrayList<String> sourceArray = arithmeticCodingPrepare.readFile("D:\\Another\\Univercity\\Тесты\\tic-second\\src\\test.txt");
         for (String source : sourceArray) {
-            System.out.println(source.getBytes().length * 8);
-            System.out.println(10*16);
             HashMap<Character, Double> probabilities = arithmeticCodingPrepare.getProbabilities(source);
 
             Pair<Double, Double> encode = arithmeticCoding.algorithm(source, probabilities);
 
-            System.out.println(encode);
-
             result.append(arithmeticCodingDecode.decode(encode.getKey(), probabilities));
-//            0.0350257222
         }
 
+        for (int i = 0; i < result.length(); i++) {
+            if (result.charAt(i) == '_') {
+                result.deleteCharAt(i);
+            }
+        }
         System.out.println(result);
     }
 }

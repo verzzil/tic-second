@@ -89,7 +89,6 @@ public class ArithmeticCoding {
                 initFrequencySection.addSection(character, probabilities.get(character));
             }
 
-            int i = 0;
             label: while (true) {
                 for (FrequencySection.Section section : initFrequencySection.getFreqSection()) {
                     if (section.getStartDiapason() <= coded && section.getEndDiapason() > coded) {

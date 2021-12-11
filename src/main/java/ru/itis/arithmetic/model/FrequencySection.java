@@ -22,6 +22,10 @@ public class FrequencySection {
         return endDiapason;
     }
 
+    public void setEndDiapason(Double endDiapason) {
+        this.endDiapason = endDiapason;
+    }
+
     public Double getTempDiapason() {
         return tempDiapason;
     }

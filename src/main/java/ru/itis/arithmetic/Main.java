@@ -22,5 +22,15 @@ public class Main {
 
         System.out.println(encode);
 
+        String decode = arithmeticCodingDecode.decode(encode, probabilities);
+
+        System.out.println(decode);
+//        String str = String.valueOf(0.32d).substring(2);
+//        System.out.println(Integer.toBinaryString(Integer.parseInt(str)));
+//
+//        String bin = "0100";
+//        Double doub = Double.valueOf("0." + Integer.parseInt(bin, 2));
+//
+//        System.out.println(doub);
     }
 }

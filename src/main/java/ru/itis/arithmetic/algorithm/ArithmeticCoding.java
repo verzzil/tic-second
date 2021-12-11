@@ -14,8 +14,6 @@ public class ArithmeticCoding {
             frequencySection.addSection(character, probabilities.get(character));
         }
 
-        System.out.println(frequencySection);
-
         for (int i = 0; i < text.length(); i++) {
             frequencySection.setNewDiapason(frequencySection.getFreqSection().get(text.charAt(i)));
 
@@ -28,12 +26,8 @@ public class ArithmeticCoding {
             }
 
             frequencySection.recalculateRange();
-
-            if (text.charAt(i) == '_') {
-                frequencySection.setEndBits();
-                break;
-            }
         }
+        frequencySection.setEndBits();
 
         return frequencySection.getResultBits().toString();
     }
@@ -52,6 +46,7 @@ public class ArithmeticCoding {
             }
 
             result.append("_");
+
             return result.toString();
         }
 
@@ -79,26 +74,69 @@ public class ArithmeticCoding {
 
     public static class Decode {
 
-//        public String decode(Double coded, HashMap<Character, Double> probabilities) {
-//            StringBuilder stringBuilder = new StringBuilder();
-//
-//            FrequencySection initFrequencySection = new FrequencySection();
-//            for (Character character : probabilities.keySet()) {
-//                initFrequencySection.addSection(character, probabilities.get(character));
-//            }
-//
-//            label: while (true) {
-//
-//                for (FrequencySection.Section section : initFrequencySection.getFreqSection()) {
-//                    if (section.getStartDiapason() <= coded && section.getEndDiapason() > coded) {
-//                        stringBuilder.append(section.getSymbol());
-//                        initFrequencySection.addSubSection(section);
-//                        if (section.getSymbol() == '_') break label;
-//                    }
-//                }
-//            }
-//
-//            return stringBuilder.toString();
-//        }
+        public String decode(String coded, HashMap<Character, Double> probabilities) {
+            StringBuilder result = new StringBuilder();
+
+            FrequencySection frequencySection = new FrequencySection();
+            for (Character character : probabilities.keySet()) {
+                frequencySection.addSection(character, probabilities.get(character));
+            }
+
+            Double ivlOffset;
+            if (coded.length() > 2) {
+                ivlOffset = Double.valueOf("0." + Integer.parseInt(coded.substring(0, 2)));
+            }
+            else
+                return "";
+
+            for (int i = 0; i < coded.length(); i++) {
+
+                while (frequencySection.getEndDiapason() - frequencySection.getStartDiapason() < 0.25d) {
+                    ivlOffset *= 2;
+                    frequencySection.setEndDiapason(frequencySection.getEndDiapason() * 2);
+
+                    ivlOffset = Double.valueOf("0." + (Integer.parseInt(String.valueOf(ivlOffset).substring(2) + 1)));
+                }
+
+                if (ivlOffset >= frequencySection.getFreqSection().get('0').getEndDiapason()) {
+                    result.append("1");
+                    ivlOffset -= (frequencySection.getEndDiapason() - frequencySection.getStartDiapason());
+                    frequencySection.setNewDiapason(frequencySection.getFreqSection().get('1'));
+                } else {
+                    result.append("0");
+                }
+
+                System.out.println(frequencySection);
+                frequencySection.recalculateRange();
+            }
+
+            return result.toString();
+        }
+
+        private String binaryDoubling(String binaryCode) {
+            StringBuilder result = new StringBuilder();
+
+            boolean haveExtraBit = false;
+            for (int i = binaryCode.length() - 1; i >= 0; i--) {
+                if (binaryCode.charAt(i) == '0') {
+                    if (haveExtraBit)
+                        result.insert(0,"1");
+                    else
+                        result.insert(0, "0");
+                    haveExtraBit = false;
+                } else {
+                    if (haveExtraBit)
+                        result.insert(0, "1");
+                    else
+                        result.insert(0, "0");
+                    haveExtraBit = true;
+                }
+            }
+
+            if (haveExtraBit)
+                result.insert(0, "1");
+
+            return result.toString();
+        }
     }
 }

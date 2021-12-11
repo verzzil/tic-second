@@ -1,15 +1,18 @@
 package ru.itis.arithmetic.model;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 public class FrequencySection {
 
-    private Double tempDiapason = 0d;
     private Double startDiapason = 0d;
     private Double endDiapason = 1d;
-    private final ArrayList<Section> freqSection = new ArrayList<>();
+    private Double tempDiapason = 0d;
+    private int bitsOutstanding = 0;
+    private final StringBuilder resultBits = new StringBuilder();
+    private final LinkedHashMap<Character, Section> freqSection = new LinkedHashMap<>();
 
-    public FrequencySection() { }
+    public FrequencySection() {
+    }
 
     public Double getStartDiapason() {
         return startDiapason;
@@ -19,50 +22,114 @@ public class FrequencySection {
         return endDiapason;
     }
 
-    public ArrayList<Section> getFreqSection() {
+    public Double getTempDiapason() {
+        return tempDiapason;
+    }
+
+    public StringBuilder getResultBits() {
+        return resultBits;
+    }
+
+    public LinkedHashMap<Character, Section> getFreqSection() {
         return freqSection;
     }
 
-    public void addSection(Character symbol, Double probability) {
-        freqSection.add(new Section(symbol, probability));
+    @Override
+    public String toString() {
+        return "FrequencySection{" +
+                "startDiapason=" + startDiapason +
+                ", endDiapason=" + endDiapason +
+                "\n freqSection=" + freqSection +
+                '}';
     }
 
-    public void addSubSection(Section section) {
-        startDiapason = section.startDiapason;
-        endDiapason = section.endDiapason;
+    public void addSection(Character symbol, Double probability) {
+        freqSection.put(
+                symbol,
+                new Section(tempDiapason, tempDiapason + probability, probability)
+        );
+        tempDiapason += probability;
+    }
 
-        Section prevSection = null;
-        for (Section sec : freqSection) {
-            if (prevSection != null)
-                sec.setStartDiapason(prevSection.endDiapason);
-            else
-                sec.setStartDiapason(startDiapason);
-            sec.setEndDiapason(startDiapason + (endDiapason - startDiapason) * sec.getProbability());
-            prevSection = sec;
+    public void setNewDiapason(Section section) {
+        this.startDiapason = section.startDiapason;
+        this.endDiapason = section.endDiapason;
+
+        this.tempDiapason = this.startDiapason;
+    }
+
+    public void renormalization() {
+        if (startDiapason >= 0d && endDiapason < 0.5d) {
+            resultBits.append("0");
+            flushAccumulatedBits("1");
+
+            expansionToTheRight();
+        } else if (startDiapason >= 0.25d && endDiapason < 0.75d) {
+            bitsOutstanding++;
+
+            expansionToAllDirections();
+        } else if (startDiapason >= 0.5d && endDiapason < 1) {
+            resultBits.append("1");
+            flushAccumulatedBits("0");
+
+            expansionToTheLeft();
+        }
+
+        this.tempDiapason = this.startDiapason;
+    }
+
+    public void recalculateRange() {
+        Double diapasonLength = this.endDiapason - this.startDiapason;
+
+        for (Character sectionName : freqSection.keySet()) {
+            freqSection.get(sectionName).setStartDiapason(tempDiapason);
+            freqSection.get(sectionName).setEndDiapason(
+                    diapasonLength * freqSection.get(sectionName).probability + freqSection.get(sectionName).getStartDiapason()
+            );
+
+            this.tempDiapason += freqSection.get(sectionName).getEndDiapason() - freqSection.get(sectionName).getStartDiapason();
         }
     }
 
-    public class Section implements Comparable<Character> {
+    public void setEndBits() {
+        if (this.startDiapason < 0.25d)
+            resultBits.append("01");
+        else
+            resultBits.append("10");
+    }
 
-        public Character symbol;
+    private void flushAccumulatedBits(String bit) {
+        for (int i = 0; i < bitsOutstanding; i++) {
+            resultBits.append(bit);
+        }
+        bitsOutstanding = 0;
+    }
+
+    private void expansionToTheRight() {
+        startDiapason *= 2;
+        endDiapason *= 2;
+    }
+
+    private void expansionToTheLeft() {
+        startDiapason = startDiapason - (1 - startDiapason);
+        endDiapason = endDiapason - (1 - endDiapason);
+    }
+
+    private void expansionToAllDirections() {
+        startDiapason = startDiapason + (startDiapason - 0.5);
+        endDiapason = endDiapason + (endDiapason - 0.5);
+    }
+
+    public class Section {
+
         private Double startDiapason;
         private Double endDiapason;
         private Double probability;
 
-        public Section(Character s, Double probability) {
-            symbol = s;
-            startDiapason = FrequencySection.this.tempDiapason;
-            endDiapason = FrequencySection.this.tempDiapason + probability;
-            FrequencySection.this.tempDiapason += probability;
-            this.probability = endDiapason;
-        }
-
-        public Character getSymbol() {
-            return symbol;
-        }
-
-        public void setSymbol(Character symbol) {
-            this.symbol = symbol;
+        public Section(Double sd, Double ed, Double prob) {
+            startDiapason = sd;
+            endDiapason = ed;
+            probability = prob;
         }
 
         public Double getStartDiapason() {
@@ -90,16 +157,11 @@ public class FrequencySection {
         }
 
         @Override
-        public int compareTo(Character symbol) {
-            return this.symbol == symbol ? 0 : -1;
-        }
-
-        @Override
         public String toString() {
             return "Section{" +
-                    "symbol=" + symbol +
-                    ", startDiapason=" + startDiapason +
+                    "startDiapason=" + startDiapason +
                     ", endDiapason=" + endDiapason +
+                    ", probability=" + probability +
                     '}';
         }
     }

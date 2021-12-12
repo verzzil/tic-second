@@ -17,14 +17,12 @@ public class Main {
     public static void main(String[] args) {
 
         StringBuilder result = new StringBuilder();
-        ArrayList<String> sourceArray = arithmeticCodingPrepare.readFile("D:\\Another\\Univercity\\Тесты\\tic-second\\src\\test.txt");
-        for (String source : sourceArray) {
-            HashMap<Character, Double> probabilities = arithmeticCodingPrepare.getProbabilities(source);
+        String source = arithmeticCodingPrepare.readFile("D:\\Another\\Univercity\\Тесты\\tic-second\\src\\test.txt");
+        HashMap<Character, Double> probabilities = arithmeticCodingPrepare.getProbabilities(source);
 
-            Pair<Double, Double> encode = arithmeticCoding.algorithm(source, probabilities);
+        Pair<Double, Double> encode = arithmeticCoding.algorithm(source, probabilities);
 
-            result.append(arithmeticCodingDecode.decode(encode.getKey(), probabilities));
-        }
+        result.append(arithmeticCodingDecode.decode(encode.getKey(), probabilities));
 
         for (int i = 0; i < result.length(); i++) {
             if (result.charAt(i) == '_') {

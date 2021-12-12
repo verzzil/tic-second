@@ -5,7 +5,6 @@ import ru.itis.arithmetic.model.FrequencySection;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ArithmeticCoding {
@@ -29,32 +28,19 @@ public class ArithmeticCoding {
 
     public static class Prepare {
 
-        public ArrayList<String> readFile(String path) {
-            ArrayList<String> chanks = new ArrayList<>();
+        public String readFile(String path) {
+            StringBuilder result = new StringBuilder();
             try (FileReader reader = new FileReader(path)) {
                 int c;
-                int counter = 0;
-                StringBuilder tempString = new StringBuilder();
                 while ((c = reader.read()) != -1) {
-                    tempString.append((char) c);
-                    if (counter > 8) {
-                        tempString.append("_");
-                        chanks.add(tempString.toString());
-                        tempString.setLength(0);
-                        counter = 0;
-                    } else {
-                        counter++;
-                    }
-                }
-                if (counter <= 9) {
-                    tempString.append("_");
-                    chanks.add(tempString.toString());
+                    result.append((char) c);
                 }
             } catch (IOException ex) {
                 System.out.println(ex.getMessage());
             }
 
-            return chanks;
+            result.append("_");
+            return result.toString();
         }
 
         public HashMap<Character, Double> getProbabilities(String text) {

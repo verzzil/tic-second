@@ -1,7 +1,7 @@
 package ru.itis.arithmetic.algorithm;
 
-import javafx.util.Pair;
 import ru.itis.arithmetic.model.FrequencySection;
+import ru.itis.arithmetic.model.Triple;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -9,17 +9,20 @@ import java.util.HashMap;
 
 public class ArithmeticCoding {
 
-    public Pair<Double, Double> algorithm(String text, HashMap<Character, Double> probabilities) {
+    public Triple algorithm(String text, HashMap<Character, Double> probabilities) {
         FrequencySection frequencySection = new FrequencySection();
         for (Character character : probabilities.keySet()) {
             frequencySection.addSection(character, probabilities.get(character));
         }
 
         for (int i = 0; i < text.length(); i++) {
-            frequencySection.setNewDiapason();
-        }
+            frequencySection.setNewDiapason(frequencySection.getFreqSection().get(text.charAt(i)));
 
-        return new Pair<>(frequencySection.getStartDiapason(), frequencySection.getEndDiapason());
+            frequencySection.recalculateRange();
+        }
+        frequencySection.addRemaining();
+
+        return new Triple(frequencySection.getResultStartDiapason(), frequencySection.getResultEndDiapason(), frequencySection.getOptimalNum());
     }
 
     public static class Prepare {
@@ -63,25 +66,33 @@ public class ArithmeticCoding {
 
     public static class Decode {
 
-        public String decode(Double coded, HashMap<Character, Double> probabilities) {
-            StringBuilder stringBuilder = new StringBuilder();
+        public String decode(String encoded, HashMap<Character, Double> probabilities) {
+            StringBuilder result = new StringBuilder();
 
-            FrequencySection initFrequencySection = new FrequencySection();
+            FrequencySection frequencySection = new FrequencySection();
             for (Character character : probabilities.keySet()) {
-                initFrequencySection.addSection(character, probabilities.get(character));
+                frequencySection.addSection(character, probabilities.get(character));
             }
 
+            int i = 0;
             label: while (true) {
-                for (FrequencySection.Section section : initFrequencySection.getFreqSection()) {
-                    if (section.getStartDiapason() <= coded && section.getEndDiapason() > coded) {
-                        stringBuilder.append(section.getSymbol());
-                        initFrequencySection.addSubSection(section);
-                        if (section.getSymbol() == '_') break label;
+                for (Character symbol : frequencySection.getFreqSection().keySet()) {
+
+                    if (frequencySection.compareDiapason(encoded, symbol)) {
+                        frequencySection.setNewDiapason(frequencySection.getFreqSection().get(symbol));
+
+                        frequencySection.recalculateRange();
+
+                        if (symbol == '_') {
+                            break label;
+                        }
+                        result.append(symbol);
+                        break;
                     }
                 }
             }
 
-            return stringBuilder.toString();
+            return result.toString();
         }
     }
 }

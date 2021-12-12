@@ -2,10 +2,8 @@ package ru.itis.arithmetic;
 
 import javafx.util.Pair;
 import ru.itis.arithmetic.algorithm.ArithmeticCoding;
-import ru.itis.arithmetic.model.FrequencySection;
+import ru.itis.arithmetic.model.Triple;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Main {
@@ -16,19 +14,24 @@ public class Main {
 
     public static void main(String[] args) {
 
-        StringBuilder result = new StringBuilder();
         String source = arithmeticCodingPrepare.readFile("D:\\Another\\Univercity\\Тесты\\tic-second\\src\\test.txt");
         HashMap<Character, Double> probabilities = arithmeticCodingPrepare.getProbabilities(source);
+        Triple encode = arithmeticCoding.algorithm(source, probabilities);
 
-        Pair<Double, Double> encode = arithmeticCoding.algorithm(source, probabilities);
+        System.out.println(encode);
 
-        result.append(arithmeticCodingDecode.decode(encode.getKey(), probabilities));
+        String decoded = arithmeticCodingDecode.decode(encode.getOptimalNum(), probabilities);
 
-        for (int i = 0; i < result.length(); i++) {
-            if (result.charAt(i) == '_') {
-                result.deleteCharAt(i);
-            }
-        }
-        System.out.println(result);
+        System.out.println(decoded);
+
+        System.out.println('0' < '9');
+//        result.append(arithmeticCodingDecode.decode(encode.getKey(), probabilities));
+//
+//        for (int i = 0; i < result.length(); i++) {
+//            if (result.charAt(i) == '_') {
+//                result.deleteCharAt(i);
+//            }
+//        }
+//        System.out.println(result);
     }
 }

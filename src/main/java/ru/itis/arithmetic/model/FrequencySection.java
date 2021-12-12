@@ -1,68 +1,221 @@
 package ru.itis.arithmetic.model;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 public class FrequencySection {
 
-    private Double tempDiapason = 0d;
-    private Double startDiapason = 0d;
-    private Double endDiapason = 1d;
-    private final ArrayList<Section> freqSection = new ArrayList<>();
+    private double startDiapason = 0d;
+    private double endDiapason = 1d;
+    private double tempDiapason = 0d;
+    private final StringBuilder resultStartDiapason = new StringBuilder();
+    private final StringBuilder resultEndDiapason = new StringBuilder();
+    private final LinkedHashMap<Character, Section> freqSection = new LinkedHashMap<>();
+    private static final int borderlineCountEquals = 5;
+    private int decodeOffset = 0;
 
-    public FrequencySection() { }
+    public FrequencySection() {
+    }
 
-    public Double getStartDiapason() {
+    public double getStartDiapason() {
         return startDiapason;
     }
 
-    public Double getEndDiapason() {
+    public double getEndDiapason() {
         return endDiapason;
     }
 
-    public ArrayList<Section> getFreqSection() {
+    public void setEndDiapason(double endDiapason) {
+        this.endDiapason = endDiapason;
+    }
+
+    public double getTempDiapason() {
+        return tempDiapason;
+    }
+
+    public String getResultStartDiapason() {
+        return resultStartDiapason.toString();
+    }
+
+    public String getResultEndDiapason() {
+        return resultEndDiapason.toString();
+    }
+
+    public LinkedHashMap<Character, Section> getFreqSection() {
         return freqSection;
     }
 
-    public void addSection(Character symbol, Double probability) {
-        freqSection.add(new Section(symbol, probability));
+    @Override
+    public String toString() {
+        return "FrequencySection{" +
+                "startDiapason=" + startDiapason +
+                ", endDiapason=" + endDiapason +
+                "\n freqSection=" + freqSection +
+                '}';
     }
 
-    public void addSubSection(Section section) {
-        startDiapason = section.startDiapason;
-        endDiapason = section.endDiapason;
+    public void addSection(Character symbol, Double probability) {
+        freqSection.put(
+                symbol,
+                new Section(tempDiapason, tempDiapason + probability, probability)
+        );
+        tempDiapason += probability;
+    }
 
-        Section prevSection = null;
-        for (Section sec : freqSection) {
-            if (prevSection != null)
-                sec.setStartDiapason(prevSection.endDiapason);
-            else
-                sec.setStartDiapason(startDiapason);
-            sec.setEndDiapason(startDiapason + (endDiapason - startDiapason) * sec.getProbability());
-            prevSection = sec;
+    public void setNewDiapason(Section section) {
+        this.startDiapason = section.startDiapason;
+        this.endDiapason = section.endDiapason;
+
+        this.tempDiapason = this.startDiapason;
+    }
+
+
+    public void recalculateRange() {
+        if (checkEqualsRank())
+            setNewScaledDiapason();
+
+        Double diapasonLength = this.endDiapason - this.startDiapason;
+
+        for (Character sectionName : freqSection.keySet()) {
+            freqSection.get(sectionName).setStartDiapason(tempDiapason);
+            freqSection.get(sectionName).setEndDiapason(
+                    diapasonLength * freqSection.get(sectionName).probability + freqSection.get(sectionName).getStartDiapason()
+            );
+
+            if (sectionName == '_') {
+                freqSection.get(sectionName).setEndDiapason(endDiapason);
+            }
+            this.tempDiapason += freqSection.get(sectionName).getEndDiapason() - freqSection.get(sectionName).getStartDiapason();
         }
     }
 
-    public class Section implements Comparable<Character> {
+    public void addRemaining() {
+        resultStartDiapason.append(String.valueOf(startDiapason).substring(2));
+        resultEndDiapason.append(String.valueOf(endDiapason).substring(2));
+    }
 
-        public Character symbol;
+    public String getOptimalNum() {
+        StringBuilder result = new StringBuilder();;
+
+        String startResult = getResultStartDiapason();
+        String endResult = getResultEndDiapason();
+
+        for (int i = 0; i < Math.min(startResult.length(), endResult.length()); i++) {
+            if (startResult.charAt(i) == endResult.charAt(i)) {
+                result.append(startResult.charAt(i));
+            } else {
+                if (
+                        Integer.parseInt(String.valueOf(endResult.charAt(i))) - Integer.parseInt(String.valueOf(startResult.charAt(i))) == 1
+                ) {
+                    boolean flag = false;
+                    for (int j = i + 1; j < endResult.length(); j++) {
+                        if (endResult.charAt(j) != '0') {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (flag)
+                        result.append(endResult.charAt(i));
+                    else {
+                        if (i + 1 == startResult.length()) {
+                            result.append(1);
+                        } else {
+                            result.append(startResult.charAt(i + 1));
+                        }
+                    }
+                } else {
+                    result.append(Integer.parseInt(String.valueOf(startResult.charAt(i))) + 1);
+                }
+                break;
+            }
+        }
+
+        return result.toString();
+    }
+
+    public boolean compareDiapason(String encoded, Character symbol) {
+        Section currentSection = freqSection.get(symbol);
+        String curStartDiap = String.valueOf(currentSection.startDiapason).substring(2);
+        String curEndDiap = String.valueOf(currentSection.endDiapason).substring(2);
+
+        String currentEncodedStr = encoded.substring(decodeOffset);
+
+        int minStartLength = Math.min(currentEncodedStr.length(), curStartDiap.length());
+        int minEndLength = Math.min(currentEncodedStr.length(), curEndDiap.length());
+
+        return recursiveStartCompareStrings(currentEncodedStr, curStartDiap, 0, minStartLength) &&
+                recursiveEndCompareStrings(currentEncodedStr, curEndDiap, 0, minEndLength);
+    }
+
+    private boolean recursiveStartCompareStrings(String encoded, String curStart, int offset, int minLength) {
+
+        if (encoded.charAt(offset) == curStart.charAt(offset)) {
+            offset++;
+            if (offset == minLength)
+                return true;
+            return recursiveStartCompareStrings(encoded, curStart, offset, minLength);
+        }
+
+        return encoded.charAt(offset) >= curStart.charAt(offset);
+    }
+
+    private boolean recursiveEndCompareStrings(String encoded, String curEnd, int offset, int minLength) {
+
+        if (encoded.charAt(offset) == curEnd.charAt(offset)) {
+            offset++;
+            if (offset == minLength) {
+                return curEnd.length() > minLength;
+            }
+            return recursiveEndCompareStrings(encoded, curEnd, offset, minLength);
+        }
+
+        return encoded.charAt(offset) < curEnd.charAt(offset);
+    }
+
+    private boolean checkEqualsRank() {
+        int counter = 0;
+        String startDiapason = String.valueOf(this.startDiapason).substring(2);
+        String endDiapason = String.valueOf(this.endDiapason).substring(2);
+
+        for (int i = 0; i < Math.min(startDiapason.length(), endDiapason.length()); i++) {
+            if (startDiapason.charAt(i) == endDiapason.charAt(i)) {
+                counter++;
+                if (counter == borderlineCountEquals) {
+                    resultStartDiapason.append(startDiapason, 0, borderlineCountEquals);
+                    resultEndDiapason.append(endDiapason, 0, borderlineCountEquals);
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private void setNewScaledDiapason() {
+        for (int i = 0; i < borderlineCountEquals; i++) {
+            startDiapason *= 10;
+            endDiapason *= 10;
+        }
+        int tempStart = (int)startDiapason;
+        int tempEnd = (int)endDiapason;
+
+        startDiapason = startDiapason - tempStart;
+        endDiapason = endDiapason - tempEnd;
+
+        tempDiapason = startDiapason;
+        decodeOffset += borderlineCountEquals;
+    }
+
+    public class Section {
+
         private Double startDiapason;
         private Double endDiapason;
         private Double probability;
 
-        public Section(Character s, Double probability) {
-            symbol = s;
-            startDiapason = FrequencySection.this.tempDiapason;
-            endDiapason = FrequencySection.this.tempDiapason + probability;
-            FrequencySection.this.tempDiapason += probability;
-            this.probability = endDiapason;
-        }
-
-        public Character getSymbol() {
-            return symbol;
-        }
-
-        public void setSymbol(Character symbol) {
-            this.symbol = symbol;
+        public Section(Double sd, Double ed, Double prob) {
+            startDiapason = sd;
+            endDiapason = ed;
+            probability = prob;
         }
 
         public Double getStartDiapason() {
@@ -90,16 +243,11 @@ public class FrequencySection {
         }
 
         @Override
-        public int compareTo(Character symbol) {
-            return this.symbol == symbol ? 0 : -1;
-        }
-
-        @Override
         public String toString() {
             return "Section{" +
-                    "symbol=" + symbol +
-                    ", startDiapason=" + startDiapason +
+                    "startDiapason=" + startDiapason +
                     ", endDiapason=" + endDiapason +
+                    ", probability=" + probability +
                     '}';
         }
     }

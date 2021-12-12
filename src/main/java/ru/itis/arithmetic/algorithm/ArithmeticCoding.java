@@ -10,20 +10,16 @@ import java.util.HashMap;
 public class ArithmeticCoding {
 
     public Pair<Double, Double> algorithm(String text, HashMap<Character, Double> probabilities) {
-        FrequencySection initFrequencySection = new FrequencySection();
+        FrequencySection frequencySection = new FrequencySection();
         for (Character character : probabilities.keySet()) {
-            initFrequencySection.addSection(character, probabilities.get(character));
+            frequencySection.addSection(character, probabilities.get(character));
         }
 
         for (int i = 0; i < text.length(); i++) {
-            for (FrequencySection.Section section : initFrequencySection.getFreqSection()) {
-                if (section.compareTo(text.charAt(i)) == 0) {
-                    initFrequencySection.addSubSection(section);
-                }
-            }
+            frequencySection.setNewDiapason();
         }
 
-        return new Pair<>(initFrequencySection.getStartDiapason(), initFrequencySection.getEndDiapason());
+        return new Pair<>(frequencySection.getStartDiapason(), frequencySection.getEndDiapason());
     }
 
     public static class Prepare {

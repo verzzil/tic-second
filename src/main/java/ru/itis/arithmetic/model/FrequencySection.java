@@ -79,11 +79,11 @@ public class FrequencySection {
             freqSection.get(sectionName).setStartDiapason(tempDiapason);
             freqSection.get(sectionName).setEndDiapason(
                     diapasonLength * freqSection.get(sectionName).probability + freqSection.get(sectionName).getStartDiapason()
+//                    ((double)Math.round(
+//                            (diapasonLength * freqSection.get(sectionName).probability) * 100000
+//                    ) / 100000) + freqSection.get(sectionName).getStartDiapason()
             );
 
-            if (sectionName == '_') {
-                freqSection.get(sectionName).setEndDiapason(endDiapason);
-            }
             this.tempDiapason += freqSection.get(sectionName).getEndDiapason() - freqSection.get(sectionName).getStartDiapason();
         }
     }

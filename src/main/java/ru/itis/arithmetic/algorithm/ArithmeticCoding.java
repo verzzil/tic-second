@@ -47,7 +47,10 @@ public class ArithmeticCoding {
             HashMap<Character, Integer> freq = getFrequency(text);
 
             for (Character character : freq.keySet()) {
-                result.put(character, (double) freq.get(character) / text.length());
+                result.put(
+                        character,
+                        (double) Math.round((double) freq.get(character) / text.length() * 1000000000) / 1000000000
+                );
             }
 
             return result;
@@ -79,17 +82,18 @@ public class ArithmeticCoding {
                 for (Character symbol : frequencySection.getFreqSection().keySet()) {
 
                     if (frequencySection.compareDiapason(encoded, symbol)) {
-                        frequencySection.setNewDiapason(frequencySection.getFreqSection().get(symbol));
-
-                        frequencySection.recalculateRange();
 
                         if (symbol == '_') {
                             break label;
                         }
+
+                        frequencySection.setNewDiapason(frequencySection.getFreqSection().get(symbol));
+
+                        frequencySection.recalculateRange();
                         result.append(symbol);
-                        break;
                     }
                 }
+
             }
 
             return result.toString();

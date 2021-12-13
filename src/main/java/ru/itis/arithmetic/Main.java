@@ -1,6 +1,5 @@
 package ru.itis.arithmetic;
 
-import javafx.util.Pair;
 import ru.itis.arithmetic.algorithm.ArithmeticCoding;
 import ru.itis.arithmetic.model.Triple;
 
@@ -16,6 +15,7 @@ public class Main {
 
         String source = arithmeticCodingPrepare.readFile("D:\\Another\\Univercity\\Тесты\\tic-second\\src\\test.txt");
         HashMap<Character, Double> probabilities = arithmeticCodingPrepare.getProbabilities(source);
+        System.out.println(probabilities);
         Triple encode = arithmeticCoding.algorithm(source, probabilities);
 
         System.out.println(encode);
@@ -24,7 +24,6 @@ public class Main {
 
         System.out.println(decoded);
 
-        System.out.println('0' < '9');
 //        result.append(arithmeticCodingDecode.decode(encode.getKey(), probabilities));
 //
 //        for (int i = 0; i < result.length(); i++) {

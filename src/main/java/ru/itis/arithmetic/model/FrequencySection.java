@@ -10,7 +10,6 @@ public class FrequencySection {
     private final StringBuilder resultStartDiapason = new StringBuilder();
     private final StringBuilder resultEndDiapason = new StringBuilder();
     private final LinkedHashMap<Character, Section> freqSection = new LinkedHashMap<>();
-    private static final int borderlineCountEquals = 5;
     private int decodeOffset = 0;
 
     public FrequencySection() {
@@ -70,8 +69,9 @@ public class FrequencySection {
 
 
     public void recalculateRange() {
-        if (checkEqualsRank())
-            setNewScaledDiapason();
+        int countEqualsRank = getCountOfEqualsRank();
+        if (countEqualsRank != 0)
+            setNewScaledDiapason(countEqualsRank);
 
         Double diapasonLength = this.endDiapason - this.startDiapason;
 
@@ -79,9 +79,6 @@ public class FrequencySection {
             freqSection.get(sectionName).setStartDiapason(tempDiapason);
             freqSection.get(sectionName).setEndDiapason(
                     diapasonLength * freqSection.get(sectionName).probability + freqSection.get(sectionName).getStartDiapason()
-//                    ((double)Math.round(
-//                            (diapasonLength * freqSection.get(sectionName).probability) * 100000
-//                    ) / 100000) + freqSection.get(sectionName).getStartDiapason()
             );
 
             this.tempDiapason += freqSection.get(sectionName).getEndDiapason() - freqSection.get(sectionName).getStartDiapason();
@@ -171,28 +168,47 @@ public class FrequencySection {
         return encoded.charAt(offset) < curEnd.charAt(offset);
     }
 
-    private boolean checkEqualsRank() {
+//    private boolean checkEqualsRank() {
+//        int counter = 0;
+//        String startDiapason = String.valueOf(this.startDiapason).substring(2);
+//        String endDiapason = String.valueOf(this.endDiapason).substring(2);
+//
+//        for (int i = 0; i < Math.min(startDiapason.length(), endDiapason.length()); i++) {
+//            if (startDiapason.charAt(i) == endDiapason.charAt(i)) {
+//                counter++;
+//                if (counter == borderlineCountEquals) {
+//                    resultStartDiapason.append(startDiapason, 0, borderlineCountEquals);
+//                    resultEndDiapason.append(endDiapason, 0, borderlineCountEquals);
+//                    return true;
+//                }
+//            } else {
+//                return false;
+//            }
+//        }
+//        return false;
+//    }
+
+    private int getCountOfEqualsRank() {
         int counter = 0;
         String startDiapason = String.valueOf(this.startDiapason).substring(2);
         String endDiapason = String.valueOf(this.endDiapason).substring(2);
 
-        for (int i = 0; i < Math.min(startDiapason.length(), endDiapason.length()); i++) {
-            if (startDiapason.charAt(i) == endDiapason.charAt(i)) {
+        int minLength = Math.min(startDiapason.length(), endDiapason.length());
+        for (int i = 0; i < minLength; i++) {
+            if (startDiapason.charAt(i) == endDiapason.charAt(i))
                 counter++;
-                if (counter == borderlineCountEquals) {
-                    resultStartDiapason.append(startDiapason, 0, borderlineCountEquals);
-                    resultEndDiapason.append(endDiapason, 0, borderlineCountEquals);
-                    return true;
-                }
-            } else {
-                return false;
+            else {
+                resultStartDiapason.append(startDiapason, 0, counter);
+                resultEndDiapason.append(endDiapason, 0, counter);
+                return counter;
             }
         }
-        return false;
+
+        return  counter;
     }
 
-    private void setNewScaledDiapason() {
-        for (int i = 0; i < borderlineCountEquals; i++) {
+    private void setNewScaledDiapason(int countOfRanks) {
+        for (int i = 0; i < countOfRanks; i++) {
             startDiapason *= 10;
             endDiapason *= 10;
         }
@@ -203,7 +219,7 @@ public class FrequencySection {
         endDiapason = endDiapason - tempEnd;
 
         tempDiapason = startDiapason;
-        decodeOffset += borderlineCountEquals;
+        decodeOffset += countOfRanks;
     }
 
     public class Section {

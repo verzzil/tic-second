@@ -49,7 +49,7 @@ public class ArithmeticCoding {
             for (Character character : freq.keySet()) {
                 result.put(
                         character,
-                        (double) Math.round((double) freq.get(character) / text.length() * 1000000000) / 1000000000
+                        (double) freq.get(character) / text.length()
                 );
             }
 

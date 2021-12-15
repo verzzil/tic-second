@@ -1,10 +1,13 @@
 package ru.itis.arithmetic.algorithm;
 
+import javafx.util.Pair;
 import ru.itis.arithmetic.model.FrequencySection;
 import ru.itis.arithmetic.model.Triple;
 
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class ArithmeticCoding {
@@ -23,6 +26,15 @@ public class ArithmeticCoding {
         frequencySection.addRemaining();
 
         return new Triple(frequencySection.getResultStartDiapason(), frequencySection.getResultEndDiapason(), frequencySection.getOptimalNum());
+    }
+
+    public void writeToFile(String path, String data) {
+        try (FileWriter writer = new FileWriter(path, false)) {
+            writer.write(data);
+            writer.flush();
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     public static class Prepare {
@@ -77,7 +89,6 @@ public class ArithmeticCoding {
                 frequencySection.addSection(character, probabilities.get(character));
             }
 
-            int i = 0;
             label: while (true) {
                 for (Character symbol : frequencySection.getFreqSection().keySet()) {
 
@@ -97,6 +108,53 @@ public class ArithmeticCoding {
             }
 
             return result.toString();
+        }
+
+        public void writeToFile(String path, String data) {
+            try(FileWriter writer = new FileWriter(path, false)) {
+                writer.write(data);
+                writer.flush();
+            }
+            catch(IOException ex){
+
+                System.out.println(ex.getMessage());
+            }
+        }
+
+        public Pair<HashMap<Character, Double>, String> readFile(String path) {
+            StringBuilder result = new StringBuilder();
+            try (FileReader reader = new FileReader(path)) {
+                int c;
+                while ((c = reader.read()) != -1) {
+                    result.append((char) c);
+                }
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage());
+            }
+
+            return getDataFromRawData(result.toString());
+        }
+
+        private Pair<HashMap<Character, Double>, String> getDataFromRawData(String rawData) {
+            HashMap<Character, Double> resultProbabilities = new HashMap<>();
+            String encoded;
+
+            String[] splitProbAndEncoded = rawData.split("-----");
+            String[] rawProbabilities = splitProbAndEncoded[0].trim()
+                    .replaceAll("[}{](?!=)", "")
+                    .split("(?<! ) ");
+
+            for (int i = 0; i < rawProbabilities.length; i++) {
+                String[] temp = rawProbabilities[i].split("=(?=\\d)");
+                resultProbabilities.put(
+                        temp[0].replaceAll("\r\n", "\n").charAt(0),
+                        Double.parseDouble(temp[1].replaceAll(",", ""))
+                );
+            }
+
+            encoded = splitProbAndEncoded[1].trim();
+
+            return new Pair<>(resultProbabilities, encoded);
         }
     }
 }

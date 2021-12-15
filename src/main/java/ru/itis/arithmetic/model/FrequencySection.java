@@ -168,26 +168,6 @@ public class FrequencySection {
         return encoded.charAt(offset) < curEnd.charAt(offset);
     }
 
-//    private boolean checkEqualsRank() {
-//        int counter = 0;
-//        String startDiapason = String.valueOf(this.startDiapason).substring(2);
-//        String endDiapason = String.valueOf(this.endDiapason).substring(2);
-//
-//        for (int i = 0; i < Math.min(startDiapason.length(), endDiapason.length()); i++) {
-//            if (startDiapason.charAt(i) == endDiapason.charAt(i)) {
-//                counter++;
-//                if (counter == borderlineCountEquals) {
-//                    resultStartDiapason.append(startDiapason, 0, borderlineCountEquals);
-//                    resultEndDiapason.append(endDiapason, 0, borderlineCountEquals);
-//                    return true;
-//                }
-//            } else {
-//                return false;
-//            }
-//        }
-//        return false;
-//    }
-
     private int getCountOfEqualsRank() {
         int counter = 0;
         String startDiapason = String.valueOf(this.startDiapason).substring(2);

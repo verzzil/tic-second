@@ -1,9 +1,12 @@
 package ru.itis.arithmetic;
 
+import javafx.util.Pair;
 import ru.itis.arithmetic.algorithm.ArithmeticCoding;
 import ru.itis.arithmetic.model.Triple;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Scanner;
 
 public class Main {
 
@@ -13,24 +16,34 @@ public class Main {
 
     public static void main(String[] args) {
 
-        String source = arithmeticCodingPrepare.readFile("D:\\Another\\Univercity\\Тесты\\tic-second\\src\\test.txt");
-        HashMap<Character, Double> probabilities = arithmeticCodingPrepare.getProbabilities(source);
-        System.out.println(probabilities);
-        Triple encode = arithmeticCoding.algorithm(source, probabilities);
+        Scanner scan = new Scanner(System.in);
 
-        System.out.println(encode);
+        System.out.println("========== Режим работы ===========");
+        System.out.println("1: Кодирование \t ----- \t  2: Декодирование");
+        int mode = scan.nextInt();
 
-        String decoded = arithmeticCodingDecode.decode(encode.getOptimalNum(), probabilities);
+        if (mode == 1) {
+            System.out.println("Введите путь до файла с данными: ");
+            String path = scan.next();
 
-        System.out.println(decoded);
+            String source = arithmeticCodingPrepare.readFile(path);
+            HashMap<Character, Double> probabilities = arithmeticCodingPrepare.getProbabilities(source);
 
-//        result.append(arithmeticCodingDecode.decode(encode.getKey(), probabilities));
-//
-//        for (int i = 0; i < result.length(); i++) {
-//            if (result.charAt(i) == '_') {
-//                result.deleteCharAt(i);
-//            }
-//        }
-//        System.out.println(result);
+            Triple encode = arithmeticCoding.algorithm(source, probabilities);
+
+            String resultData = probabilities.toString() + "\n-----\n" +
+                    encode.getOptimalNum();
+            arithmeticCoding.writeToFile("./coderResult.txt", resultData);
+
+            System.out.println(probabilities);
+        } else if (mode == 2) {
+            Pair<HashMap<Character, Double>, String> data = arithmeticCodingDecode.readFile("./coderResult.txt");
+
+            String decoded = arithmeticCodingDecode.decode(data.getValue(), data.getKey());
+
+            arithmeticCodingDecode.writeToFile("./decoderResult.txt", decoded);
+
+            System.out.println("Декодировано");
+        }
     }
 }

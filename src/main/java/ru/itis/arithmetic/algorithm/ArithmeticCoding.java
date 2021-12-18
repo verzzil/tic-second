@@ -7,7 +7,6 @@ import ru.itis.arithmetic.model.Triple;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class ArithmeticCoding {
@@ -81,7 +80,7 @@ public class ArithmeticCoding {
 
     public static class Decode {
 
-        public String decode(String encoded, HashMap<Character, Double> probabilities) {
+        public String decode(String encoded, HashMap<Character, Double> probabilities, String borderlineSymbol) {
             StringBuilder result = new StringBuilder();
 
             FrequencySection frequencySection = new FrequencySection();
@@ -89,12 +88,12 @@ public class ArithmeticCoding {
                 frequencySection.addSection(character, probabilities.get(character));
             }
 
+            int i = 0;
             label: while (true) {
                 for (Character symbol : frequencySection.getFreqSection().keySet()) {
-
                     if (frequencySection.compareDiapason(encoded, symbol)) {
 
-                        if (symbol == '_') {
+                        if (String.valueOf(symbol).equals(borderlineSymbol)) {
                             break label;
                         }
 
@@ -104,7 +103,6 @@ public class ArithmeticCoding {
                         result.append(symbol);
                     }
                 }
-
             }
 
             return result.toString();
@@ -121,7 +119,7 @@ public class ArithmeticCoding {
             }
         }
 
-        public Pair<HashMap<Character, Double>, String> readFile(String path) {
+        public Pair<Pair<HashMap<Character, Double>, String>, String> readFile(String path) {
             StringBuilder result = new StringBuilder();
             try (FileReader reader = new FileReader(path)) {
                 int c;
@@ -135,26 +133,29 @@ public class ArithmeticCoding {
             return getDataFromRawData(result.toString());
         }
 
-        private Pair<HashMap<Character, Double>, String> getDataFromRawData(String rawData) {
+        private Pair<Pair<HashMap<Character, Double>, String>, String> getDataFromRawData(String rawData) {
             HashMap<Character, Double> resultProbabilities = new HashMap<>();
             String encoded;
+            String borderlineSymbol;
 
-            String[] splitProbAndEncoded = rawData.split("-----");
+            String[] splitProbAndEncoded = rawData.split(" ----- ");
             String[] rawProbabilities = splitProbAndEncoded[0].trim()
                     .replaceAll("[}{](?!=)", "")
-                    .split("(?<! ) ");
+                    .split(" (?!=)");
 
             for (int i = 0; i < rawProbabilities.length; i++) {
                 String[] temp = rawProbabilities[i].split("=(?=\\d)");
+
                 resultProbabilities.put(
                         temp[0].replaceAll("\r\n", "\n").charAt(0),
                         Double.parseDouble(temp[1].replaceAll(",", ""))
                 );
             }
 
-            encoded = splitProbAndEncoded[1].trim();
+            borderlineSymbol = splitProbAndEncoded[1].trim();
+            encoded = splitProbAndEncoded[2].trim();
 
-            return new Pair<>(resultProbabilities, encoded);
+            return new Pair<>(new Pair<>(resultProbabilities, borderlineSymbol), encoded);
         }
     }
 }

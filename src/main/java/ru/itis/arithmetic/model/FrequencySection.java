@@ -10,7 +10,7 @@ public class FrequencySection {
     private final StringBuilder resultStartDiapason = new StringBuilder();
     private final StringBuilder resultEndDiapason = new StringBuilder();
     private final LinkedHashMap<Character, Section> freqSection = new LinkedHashMap<>();
-    private int decodeOffset = 0;
+    public int decodeOffset = 0;
 
     public FrequencySection() {
     }
@@ -66,7 +66,6 @@ public class FrequencySection {
 
         this.tempDiapason = this.startDiapason;
     }
-
 
     public void recalculateRange() {
         int countEqualsRank = getCountOfEqualsRank();
@@ -131,8 +130,8 @@ public class FrequencySection {
 
     public boolean compareDiapason(String encoded, Character symbol) {
         Section currentSection = freqSection.get(symbol);
-        String curStartDiap = String.valueOf(currentSection.startDiapason).substring(2);
-        String curEndDiap = String.valueOf(currentSection.endDiapason).substring(2);
+        String curStartDiap = getCorrectStringFromDouble(String.valueOf(currentSection.startDiapason));
+        String curEndDiap = getCorrectStringFromDouble(String.valueOf(currentSection.endDiapason));
 
         String currentEncodedStr = encoded.substring(decodeOffset);
 
@@ -170,21 +169,70 @@ public class FrequencySection {
 
     private int getCountOfEqualsRank() {
         int counter = 0;
-        String startDiapason = String.valueOf(this.startDiapason).substring(2);
-        String endDiapason = String.valueOf(this.endDiapason).substring(2);
+        String startDiapason = getCorrectStringFromDouble(String.valueOf(this.startDiapason));
+        String endDiapason = getCorrectStringFromDouble(String.valueOf(this.endDiapason));
+
+        if (this.startDiapason == 0.0d) {
+            while (endDiapason.charAt(counter) == '0') {
+                resultStartDiapason.append("0");
+                resultEndDiapason.append("0");
+                System.out.println(resultStartDiapason);
+                counter++;
+            }
+            return counter;
+        }
 
         int minLength = Math.min(startDiapason.length(), endDiapason.length());
         for (int i = 0; i < minLength; i++) {
             if (startDiapason.charAt(i) == endDiapason.charAt(i))
                 counter++;
             else {
-                resultStartDiapason.append(startDiapason, 0, counter);
-                resultEndDiapason.append(endDiapason, 0, counter);
+                resultStartDiapason.append(startDiapason, 0, i);
+                resultEndDiapason.append(endDiapason, 0, i);
+
                 return counter;
             }
         }
 
-        return  counter;
+        return counter;
+    }
+
+    private String getCorrectStringFromDouble(String num) {
+
+        if (num.matches(".*E.*")) {
+            StringBuilder result = new StringBuilder();
+            String[] splittedData = num.split("E");
+
+            int additionalForExp;
+            try {
+                additionalForExp = splittedData[0].split("\\.")[1].length();
+            } catch (ArrayIndexOutOfBoundsException e) {
+                additionalForExp = 0;
+            }
+            Integer exponen = Integer.parseInt(splittedData[1].substring(1)) + additionalForExp;
+
+            splittedData[0] = splittedData[0].replaceAll("\\.", "");
+
+            int tempJ = 0;
+            for (int i = exponen; i >= 0; i--) {
+                if (tempJ < splittedData[0].length()) {
+                    if (i - 1 < 0) {
+                        result.append(".");
+                    }
+                    result.append(splittedData[0].charAt(tempJ));
+                    tempJ++;
+                } else {
+                    if (i - 1 < 0) {
+                        result.insert(0, ".");
+                    }
+                    result.insert(0, "0");
+                }
+            }
+
+            return result.substring(2);
+        }
+
+        return num.substring(2);
     }
 
     private void setNewScaledDiapason(int countOfRanks) {

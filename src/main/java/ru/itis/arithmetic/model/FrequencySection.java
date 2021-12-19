@@ -7,28 +7,12 @@ public class FrequencySection {
     private double startDiapason = 0d;
     private double endDiapason = 1d;
     private double tempDiapason = 0d;
-    private final StringBuilder resultStartDiapason = new StringBuilder();
-    private final StringBuilder resultEndDiapason = new StringBuilder();
+    public final StringBuilder resultStartDiapason = new StringBuilder();
+    public final StringBuilder resultEndDiapason = new StringBuilder();
     private final LinkedHashMap<Character, Section> freqSection = new LinkedHashMap<>();
     public int decodeOffset = 0;
 
     public FrequencySection() {
-    }
-
-    public double getStartDiapason() {
-        return startDiapason;
-    }
-
-    public double getEndDiapason() {
-        return endDiapason;
-    }
-
-    public void setEndDiapason(double endDiapason) {
-        this.endDiapason = endDiapason;
-    }
-
-    public double getTempDiapason() {
-        return tempDiapason;
     }
 
     public String getResultStartDiapason() {
@@ -95,33 +79,48 @@ public class FrequencySection {
         String startResult = getResultStartDiapason();
         String endResult = getResultEndDiapason();
 
-        for (int i = 0; i < Math.min(startResult.length(), endResult.length()); i++) {
+        int i = 0;
+        boolean haveDifferentRank = false;
+        while (i < Math.min(startResult.length(), endResult.length())) {
             if (startResult.charAt(i) == endResult.charAt(i)) {
                 result.append(startResult.charAt(i));
             } else {
-                if (
-                        Integer.parseInt(String.valueOf(endResult.charAt(i))) - Integer.parseInt(String.valueOf(startResult.charAt(i))) == 1
-                ) {
-                    boolean flag = false;
-                    for (int j = i + 1; j < endResult.length(); j++) {
-                        if (endResult.charAt(j) != '0') {
-                            flag = true;
-                            break;
-                        }
-                    }
-                    if (flag)
-                        result.append(endResult.charAt(i));
-                    else {
-                        if (i + 1 == startResult.length()) {
-                            result.append(1);
-                        } else {
-                            result.append(startResult.charAt(i + 1));
-                        }
+                haveDifferentRank = true;
+                if (i + 1 == startResult.length()) {
+                    if (getIntFromStr(endResult.charAt(i)) - getIntFromStr(startResult.charAt(i)) == 1) {
+                        result.append(getIntFromStr(startResult.charAt(i)));
+                        result.append("1");
+                    } else {
+                        result.append(getIntFromStr(startResult.charAt(i)) + 1);
                     }
                 } else {
-                    result.append(Integer.parseInt(String.valueOf(startResult.charAt(i))) + 1);
+                    if (getIntFromStr(endResult.charAt(i)) - getIntFromStr(startResult.charAt(i)) == 1) {
+                        result.append(getIntFromStr(startResult.charAt(i++)));
+
+                        while (i != startResult.length() && startResult.charAt(i) == '9') {
+                            result.append("9");
+                            i++;
+                        }
+
+                        if (i + 1 >= startResult.length()) {
+                            result.append("1");
+                        } else {
+                            result.append(getIntFromStr(startResult.charAt(i)) + 1);
+                        }
+                    } else {
+                        result.append(getIntFromStr(startResult.charAt(i)) + 1);
+                    }
                 }
                 break;
+            }
+            i++;
+        }
+
+        if (!haveDifferentRank) {
+            if (getIntFromStr(endResult.charAt(i)) == 1) {
+                result.append("01");
+            } else {
+                result.append("1");
             }
         }
 
@@ -140,6 +139,10 @@ public class FrequencySection {
 
         return recursiveStartCompareStrings(currentEncodedStr, curStartDiap, 0, minStartLength) &&
                 recursiveEndCompareStrings(currentEncodedStr, curEndDiap, 0, minEndLength);
+    }
+
+    private Integer getIntFromStr(char character) {
+        return Integer.parseInt(String.valueOf(character));
     }
 
     private boolean recursiveStartCompareStrings(String encoded, String curStart, int offset, int minLength) {

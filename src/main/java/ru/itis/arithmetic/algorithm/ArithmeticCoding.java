@@ -2,17 +2,14 @@ package ru.itis.arithmetic.algorithm;
 
 import javafx.util.Pair;
 import ru.itis.arithmetic.model.FrequencySection;
-import ru.itis.arithmetic.model.Triple;
-
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class ArithmeticCoding {
 
-    public Triple algorithm(String text, HashMap<Character, Double> probabilities) {
+    public String algorithm(String text, HashMap<Character, Double> probabilities) {
         FrequencySection frequencySection = new FrequencySection();
         for (Character character : probabilities.keySet()) {
             frequencySection.addSection(character, probabilities.get(character));
@@ -25,7 +22,7 @@ public class ArithmeticCoding {
         }
         frequencySection.addRemaining();
 
-        return new Triple(frequencySection.getResultStartDiapason(), frequencySection.getResultEndDiapason(), frequencySection.getOptimalNum());
+        return frequencySection.getOptimalNum();
     }
 
     public void writeToFile(String path, String data) {

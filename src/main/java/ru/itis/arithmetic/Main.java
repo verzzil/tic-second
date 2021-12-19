@@ -2,7 +2,6 @@ package ru.itis.arithmetic;
 
 import javafx.util.Pair;
 import ru.itis.arithmetic.algorithm.ArithmeticCoding;
-import ru.itis.arithmetic.model.Triple;
 
 import java.util.HashMap;
 import java.util.Scanner;
@@ -31,10 +30,10 @@ public class Main {
             String source = arithmeticCodingPrepare.readFile(path);
             HashMap<Character, Double> probabilities = arithmeticCodingPrepare.getProbabilities(source);
 
-            Triple encode = arithmeticCoding.algorithm(source, probabilities);
+            String encode = arithmeticCoding.algorithm(source, probabilities);
 
             String resultData = probabilities.toString() + " ----- " + borderlineSymbol + " ----- " +
-                    encode.getOptimalNum();
+                    encode;
             arithmeticCoding.writeToFile("./coderResult.txt", resultData);
         } else if (mode == 2) {
             Pair<Pair<HashMap<Character, Double>, String>, String> data = arithmeticCodingDecode.readFile("./coderResult.txt");

@@ -9,7 +9,7 @@ public class FrequencySection {
     private double tempDiapason = 0d;
     public final StringBuilder resultStartDiapason = new StringBuilder();
     public final StringBuilder resultEndDiapason = new StringBuilder();
-    private final LinkedHashMap<Character, Section> freqSection = new LinkedHashMap<>();
+    private final LinkedHashMap<String, Section> freqSection = new LinkedHashMap<>();
     private int decodeOffset = 0;
 
     public String getResultStartDiapason() {
@@ -20,7 +20,7 @@ public class FrequencySection {
         return resultEndDiapason.toString();
     }
 
-    public LinkedHashMap<Character, Section> getFreqSection() {
+    public LinkedHashMap<String, Section> getFreqSection() {
         return freqSection;
     }
 
@@ -33,7 +33,7 @@ public class FrequencySection {
                 '}';
     }
 
-    public void addSection(Character symbol, Double probability) {
+    public void addSection(String symbol, Double probability) {
         freqSection.put(
                 symbol,
                 new Section(tempDiapason, tempDiapason + probability, probability)
@@ -55,7 +55,7 @@ public class FrequencySection {
 
         Double diapasonLength = this.endDiapason - this.startDiapason;
 
-        for (Character sectionName : freqSection.keySet()) {
+        for (String sectionName : freqSection.keySet()) {
             freqSection.get(sectionName).setStartDiapason(tempDiapason);
             freqSection.get(sectionName).setEndDiapason(
                     diapasonLength * freqSection.get(sectionName).probability + freqSection.get(sectionName).getStartDiapason()
@@ -128,7 +128,7 @@ public class FrequencySection {
         return result.toString();
     }
 
-    public boolean compareDiapason(String encoded, Character symbol) {
+    public boolean compareDiapason(String encoded, String symbol) {
         Section currentSection = freqSection.get(symbol);
         String curStartDiap = getCorrectStringFromDouble(String.valueOf(currentSection.startDiapason));
         String curEndDiap = getCorrectStringFromDouble(String.valueOf(currentSection.endDiapason));
@@ -260,7 +260,7 @@ public class FrequencySection {
 
         private Double startDiapason;
         private Double endDiapason;
-        private Double probability;
+        private final Double probability;
 
         public Section(Double sd, Double ed, Double prob) {
             startDiapason = sd;

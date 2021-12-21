@@ -32,7 +32,7 @@ public class Main {
             String borderlineSymbol = scan.next();
 
             String source = arithmeticCodingPrepare.readFile(path, borderlineSymbol);
-            HashMap<Character, Double> probabilities = arithmeticCodingPrepare.getProbabilities(source);
+            HashMap<String, Double> probabilities = arithmeticCodingPrepare.getProbabilities(source);
 
             String encode = arithmeticCoding.algorithm(source, probabilities);
 
@@ -40,9 +40,9 @@ public class Main {
                     encode;
             arithmeticCoding.writeToFile("./coderResult.txt", resultData);
         } else if (mode == 2) {
-            Pair<Pair<HashMap<Character, Double>, String>, String> data = arithmeticCodingDecode.readFile("./coderResult.txt");
+            Pair<Pair<HashMap<String, Double>, String>, String> data = arithmeticCodingDecode.readFile("./coderResult.txt");
 
-            HashMap<Character, Double> probabilities = data.getKey().getKey();
+            HashMap<String, Double> probabilities = data.getKey().getKey();
             String borderlineSymbol = data.getKey().getValue();
             String encoded = data.getValue();
 

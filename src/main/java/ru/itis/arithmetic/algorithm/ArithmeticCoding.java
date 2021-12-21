@@ -2,23 +2,27 @@ package ru.itis.arithmetic.algorithm;
 
 import javafx.util.Pair;
 import ru.itis.arithmetic.model.FrequencySection;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class ArithmeticCoding {
 
-    public String algorithm(String text, HashMap<Character, Double> probabilities) {
+    public String algorithm(String text, HashMap<String, Double> probabilities) {
         FrequencySection frequencySection = new FrequencySection();
-        for (Character character : probabilities.keySet()) {
+        for (String character : probabilities.keySet()) {
             frequencySection.addSection(character, probabilities.get(character));
         }
 
-        for (int i = 0; i < text.length(); i++) {
-            frequencySection.setNewDiapason(frequencySection.getFreqSection().get(text.charAt(i)));
+        for (int i = 0; i < text.length();) {
+            int utf8Code = text.codePointAt(i);
+            frequencySection.setNewDiapason(frequencySection.getFreqSection().get(text.substring(i, i + Character.charCount(utf8Code))));
 
             frequencySection.recalculateRange();
+
+            i += Character.charCount(utf8Code);
         }
         frequencySection.addRemaining();
 
@@ -51,11 +55,11 @@ public class ArithmeticCoding {
             return result.toString();
         }
 
-        public HashMap<Character, Double> getProbabilities(String text) {
-            HashMap<Character, Double> result = new HashMap<>();
-            HashMap<Character, Integer> freq = getFrequency(text);
+        public HashMap<String, Double> getProbabilities(String text) {
+            HashMap<String, Double> result = new HashMap<>();
+            HashMap<String, Integer> freq = getFrequency(text);
 
-            for (Character character : freq.keySet()) {
+            for (String character : freq.keySet()) {
                 result.put(
                         character,
                         (double) freq.get(character) / text.length()
@@ -65,12 +69,15 @@ public class ArithmeticCoding {
             return result;
         }
 
-        private HashMap<Character, Integer> getFrequency(String text) {
-            HashMap<Character, Integer> freqMap = new HashMap<>();
-            for (int i = 0; i < text.length(); i++) {
-                Character character = text.charAt(i);
+        private HashMap<String, Integer> getFrequency(String text) {
+            HashMap<String, Integer> freqMap = new HashMap<>();
+
+            for (int i = 0; i < text.length();) {
+                int utf8Code = text.codePointAt(i);
+                String character = text.substring(i, i + Character.charCount(utf8Code));
                 Integer count = freqMap.get(character);
                 freqMap.put(character, count != null ? count + 1 : 1);
+                i += Character.charCount(utf8Code);
             }
             return freqMap;
         }
@@ -78,16 +85,16 @@ public class ArithmeticCoding {
 
     public static class Decode {
 
-        public String decode(String encoded, HashMap<Character, Double> probabilities, String borderlineSymbol) {
+        public String decode(String encoded, HashMap<String, Double> probabilities, String borderlineSymbol) {
             StringBuilder result = new StringBuilder();
 
             FrequencySection frequencySection = new FrequencySection();
-            for (Character character : probabilities.keySet()) {
+            for (String character : probabilities.keySet()) {
                 frequencySection.addSection(character, probabilities.get(character));
             }
 
             label: while (true) {
-                for (Character symbol : frequencySection.getFreqSection().keySet()) {
+                for (String symbol : frequencySection.getFreqSection().keySet()) {
                     if (frequencySection.compareDiapason(encoded, symbol)) {
 
                         if (String.valueOf(symbol).equals(borderlineSymbol)) {
@@ -115,8 +122,9 @@ public class ArithmeticCoding {
             }
         }
 
-        public Pair<Pair<HashMap<Character, Double>, String>, String> readFile(String path) {
+        public Pair<Pair<HashMap<String, Double>, String>, String> readFile(String path) {
             StringBuilder result = new StringBuilder();
+
             try (FileReader reader = new FileReader(path)) {
                 int c;
                 while ((c = reader.read()) != -1) {
@@ -126,11 +134,12 @@ public class ArithmeticCoding {
                 System.out.println(ex.getMessage());
             }
 
+
             return getDataFromRawData(result.toString());
         }
 
-        private Pair<Pair<HashMap<Character, Double>, String>, String> getDataFromRawData(String rawData) {
-            HashMap<Character, Double> resultProbabilities = new HashMap<>();
+        private Pair<Pair<HashMap<String, Double>, String>, String> getDataFromRawData(String rawData) {
+            HashMap<String, Double> resultProbabilities = new HashMap<>();
             String encoded;
             String borderlineSymbol;
 
@@ -143,7 +152,7 @@ public class ArithmeticCoding {
                 String[] temp = rawProbabilities[i].split("=(?=\\d)");
 
                 resultProbabilities.put(
-                        temp[0].replaceAll("\r\n", "\n").charAt(0),
+                        temp[0].replaceAll("\r\n", "\n"),
                         Double.parseDouble(temp[1].replaceAll(",", ""))
                 );
             }

@@ -2,6 +2,7 @@ package ru.itis.arithmetic;
 
 import javafx.util.Pair;
 import ru.itis.arithmetic.algorithm.ArithmeticCoding;
+import ru.itis.arithmetic.model.FrequencySection;
 
 import java.util.HashMap;
 import java.util.Scanner;
@@ -13,7 +14,10 @@ public class Main {
     private final static ArithmeticCoding.Decode arithmeticCodingDecode = new ArithmeticCoding.Decode();
 
     public static void main(String[] args) {
+        mainLogic();
+    }
 
+    private static void mainLogic() {
         Scanner scan = new Scanner(System.in);
 
         System.out.println("========== Режим работы ===========");
@@ -27,7 +31,7 @@ public class Main {
             System.out.println("Введите символ, которого нет в текте: ");
             String borderlineSymbol = scan.next();
 
-            String source = arithmeticCodingPrepare.readFile(path);
+            String source = arithmeticCodingPrepare.readFile(path, borderlineSymbol);
             HashMap<Character, Double> probabilities = arithmeticCodingPrepare.getProbabilities(source);
 
             String encode = arithmeticCoding.algorithm(source, probabilities);

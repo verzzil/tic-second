@@ -10,10 +10,7 @@ public class FrequencySection {
     public final StringBuilder resultStartDiapason = new StringBuilder();
     public final StringBuilder resultEndDiapason = new StringBuilder();
     private final LinkedHashMap<Character, Section> freqSection = new LinkedHashMap<>();
-    public int decodeOffset = 0;
-
-    public FrequencySection() {
-    }
+    private int decodeOffset = 0;
 
     public String getResultStartDiapason() {
         return resultStartDiapason.toString();
@@ -102,7 +99,7 @@ public class FrequencySection {
                             i++;
                         }
 
-                        if (i + 1 >= startResult.length()) {
+                        if (i >= startResult.length()) {
                             result.append("1");
                         } else {
                             result.append(getIntFromStr(startResult.charAt(i)) + 1);
@@ -117,6 +114,10 @@ public class FrequencySection {
         }
 
         if (!haveDifferentRank) {
+            while (endResult.charAt(i) == '0') {
+                result.append("0");
+                i++;
+            }
             if (getIntFromStr(endResult.charAt(i)) == 1) {
                 result.append("01");
             } else {
@@ -162,7 +163,10 @@ public class FrequencySection {
         if (encoded.charAt(offset) == curEnd.charAt(offset)) {
             offset++;
             if (offset == minLength) {
-                return curEnd.length() > minLength;
+                for (int i = offset; i < curEnd.length(); i++)
+                    if (curEnd.charAt(i) != '0')
+                        return true;
+                return false;
             }
             return recursiveEndCompareStrings(encoded, curEnd, offset, minLength);
         }
@@ -179,7 +183,6 @@ public class FrequencySection {
             while (endDiapason.charAt(counter) == '0') {
                 resultStartDiapason.append("0");
                 resultEndDiapason.append("0");
-                System.out.println(resultStartDiapason);
                 counter++;
             }
             return counter;
@@ -279,14 +282,6 @@ public class FrequencySection {
 
         public void setEndDiapason(Double endDiapason) {
             this.endDiapason = endDiapason;
-        }
-
-        public Double getProbability() {
-            return probability;
-        }
-
-        public void setProbability(Double probability) {
-            this.probability = probability;
         }
 
         @Override

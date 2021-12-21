@@ -36,7 +36,7 @@ public class ArithmeticCoding {
 
     public static class Prepare {
 
-        public String readFile(String path) {
+        public String readFile(String path, String borderlineSymbol) {
             StringBuilder result = new StringBuilder();
             try (FileReader reader = new FileReader(path)) {
                 int c;
@@ -47,7 +47,7 @@ public class ArithmeticCoding {
                 System.out.println(ex.getMessage());
             }
 
-            result.append("_");
+            result.append(borderlineSymbol);
             return result.toString();
         }
 
@@ -101,7 +101,6 @@ public class ArithmeticCoding {
                     }
                 }
             }
-
             return result.toString();
         }
 
